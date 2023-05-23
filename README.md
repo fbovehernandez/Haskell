@@ -1,1 +1,1 @@
-# ParcialesHaskell
+# repo para parciales
