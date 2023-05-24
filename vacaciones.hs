@@ -52,16 +52,16 @@ cathi= UnTurista 15 15 True ["Aleman","Catalan"]
 
 -- 2 
 
-hacerExcursion :: Excursion -> Turista -> Turista
-hacerExcursion unaExcursion unTurista = modificarStress (-div (stress unTurista)  10) . unaExcursion $ unTurista
+hacerExcursion :: Turista -> Excursion -> Turista
+hacerExcursion unTurista unaExcursion = modificarStress (-div (stress unTurista)  10) . unaExcursion $ unTurista
 
--- deltaSegun :: (a -> Int) -> a -> a -> Int
--- deltaSegun f algo1 algo2 = f algo1 - f algo2
+deltaSegun :: (a -> Int) -> a -> a -> Int
+deltaSegun f algo1 algo2 = f algo1 - f algo2
 
 type Indice = Turista -> Int -- Cansancion y stress
 
 deltaExcursionSegun :: Indice -> Turista -> Excursion -> Int
-deltaExcursionSegun indice unTurista unaExcursion = indice unTurista - indice (hacerExcursion unaExcursion unTurista)
+deltaExcursionSegun indice unTurista unaExcursion = indice unTurista - indice (hacerExcursion unTurista unaExcursion)
 
 esEducativa :: Turista -> Excursion -> Bool
 esEducativa unTurista unaExcursion  = deltaExcursionSegun cantidadIdioma unTurista unaExcursion /= 0
@@ -78,4 +78,50 @@ excursionesDesestresantes unTurista = filter ((>3) . deltaExcursionSegun stress 
 esDesestresante :: Turista -> Excursion -> Bool
 esDesestresante unTurista unaExcursion = deltaExcursionSegun stress unTurista unaExcursion >= 3
 
--- 3 
+-- 3
+type Tour = [Excursion] -- [Turista -> Turista]
+
+completo :: Tour
+completo = [caminar 20, apreciarElemento "cascada", caminar 40, irALaPlaya, salirAHablarIdioma "melmacquiano"]
+
+ladoB :: Excursion -> Tour
+ladoB excursion = [paseoEnBarco Tranquila, excursion, caminar 120]
+
+islaVecina :: Marea -> Tour
+islaVecina unaMarea 
+    | unaMarea == Fuerte = [paseoEnBarco unaMarea, apreciarElemento "lago", paseoEnBarco unaMarea]
+    | otherwise = [paseoEnBarco unaMarea, irALaPlaya, paseoEnBarco unaMarea]
+    
+hacerTour :: Turista -> Tour -> Turista
+hacerTour unTurista unTour = foldr (flip hacerExcursion)(modificarStress (length unTour) unTurista) unTour 
+
+-- hacerTour :: Turista -> Tour -> Turista
+-- hacerTour unTurista unTour = foldr ($) (modificarStress (length unTour) unTurista) unTour -- Esto no estaria mal, pero en si no estaria reduciendo el stess por excursion aplicada
+
+esConvincente :: Turista -> [Tour] -> Bool
+esConvincente unTurista = any (tourConvincente unTurista)
+    
+tourConvincente :: Turista -> Tour -> Bool -- Tour = [Excursion]
+tourConvincente unTurista = any (tedejaAcompaniado unTurista) . excursionesDesestresantes unTurista
+
+tedejaAcompaniado :: Turista -> Excursion -> Bool --No termino de enteder esta funcion (resolucion)
+tedejaAcompaniado unTurista = not . viajaSolo . hacerExcursion unTurista 
+
+efectividad :: Tour -> [Turista] -> Int
+efectividad unTour = sum . map (espiritualidad unTour) . filter ((flip tourConvincente) unTour)
+
+-- map (a -> b) -> [a] -> [b]
+
+espiritualidad ::  Tour -> Turista -> Int
+espiritualidad unTour  = negate . deltaRutina unTour
+
+deltaRutina :: Tour -> Turista -> Int
+deltaRutina tour turista = deltaSegun nivelDeRutina (hacerTour turista tour) turista
+
+nivelDeRutina :: Turista -> Int
+nivelDeRutina turista = cansancio turista + stress turista
+
+-- deltaSegun :: (a -> Int) -> a -> a -> Int
+-- deltaSegun f algo1 algo2 = f algo1 - f algo2
+
+-- 4
