@@ -1,4 +1,4 @@
------------------ Parcial Vacaciones
+----------------- Parcial Vacaciones 2020
 data Turista = UnTurista {
     cansancio :: Int,
     stress :: Int,
@@ -92,6 +92,9 @@ islaVecina unaMarea
     | unaMarea == Fuerte = [paseoEnBarco unaMarea, apreciarElemento "lago", paseoEnBarco unaMarea]
     | otherwise = [paseoEnBarco unaMarea, irALaPlaya, paseoEnBarco unaMarea]
     
+salidaLocal :: Excursion
+salidaLocal = salirAHablarIdioma "melmacquiano"
+
 hacerTour :: Turista -> Tour -> Turista
 hacerTour unTurista unTour = foldr (flip hacerExcursion)(modificarStress (length unTour) unTurista) unTour 
 
@@ -125,3 +128,8 @@ nivelDeRutina turista = cansancio turista + stress turista
 -- deltaSegun f algo1 algo2 = f algo1 - f algo2
 
 -- 4
+playasEternas :: Tour
+playasEternas = irALaPlaya : repeat irALaPlaya
+
+-- Para ana si es convincente ya que le reduce el stress , dado que siempre viaja acompaña. En cambio para Beto no lo sera ya que no es desestresante y tampoco viaja acompañado 
+-- No, ya que cuando realiza la funcion lo hace con la lista infinita de playas. 
