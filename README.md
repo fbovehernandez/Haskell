@@ -3,7 +3,7 @@ direccion de la carpeta main : C:\Users\Facu\Paradigmas\Test\ParcialesHaskell> /
 
 el pto 6 de thanos lo hago dps (recursividad!!!) 
 
-Estoy totalmente hardstuck en el de carreras 
+
 
 
 
