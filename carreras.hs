@@ -1,11 +1,14 @@
 -----------------  PARCIAL CARRERAS 2021 ----------------- 1
 
 data Auto = UnAuto {
-    color :: String,
+    color :: Color,
     velocidad :: Int,
     distancia :: Int,
     posicion :: Int -- Puede ser cualquier (mirar 1c)
-} 
+} deriving (Eq,Show)
+
+data Color = Rojo | Azul | Verde | Marron | Naranja deriving (Eq,Show)
+
 type PowerUp = [Auto] -> [Auto]
 type Carrera = [Auto]
 
@@ -40,9 +43,6 @@ aplicarModificador f unAuto = unAuto {velocidad = (f  . velocidad) unAuto }
 bajarVelocidad :: Int -> Auto -> Auto
 bajarVelocidad cantidad = aplicarModificador (negate . (+ cantidad))
 
-restar :: Int -> Int -> Int
-restar valor1 valor2 = min (valor2 - valor1) 0
-
 -- 3
 afectarALosQueCumplen :: (a -> Bool) -> (a -> a) -> [a] -> [a]
 afectarALosQueCumplen criterio efecto lista
@@ -56,4 +56,24 @@ miguelitos cantidad unAuto = afectarALosQueCumplen (estaDetras unAuto) (aplicarM
 
 estaDetras :: Auto -> Auto -> Bool
 estaDetras unAuto1 unAuto2 = distancia unAuto1 > distancia unAuto2
+
+--4 
+type Eventos = Carrera -> Carrera -- ([Autos] -> [Autos])
+
+simularCarrera :: Carrera -> [Eventos] -> [(Int, Color)]
+simularCarrera carrera unEvento = tablaFinal . aplicarEvento unEvento $ carrera 
+
+aplicarEvento :: [Eventos] -> Carrera -> Carrera
+aplicarEvento f unosAutos = foldl realizarEvento unosAutos f
+-- o simplemente foldl ($) unosAutos f ... el tan hermoso signo ($) que implementa el evento en la carrera recibida ;)
+
+realizarEvento :: Carrera -> Eventos -> Carrera
+realizarEvento unaCarrera unEvento = unEvento unaCarrera
+
+tablaFinal :: Carrera -> [(Int, Color)]
+tablaFinal = map transformarEnTupla 
+
+transformarEnTupla :: Auto -> (Int,Color)
+transformarEnTupla unAuto = (posicion unAuto, color unAuto)
+
 
