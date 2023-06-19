@@ -1,7 +1,5 @@
 # repo para parciales.. .
 direccion de la carpeta main : C:\Users\Facu\Paradigmas\Test\ParcialesHaskell> / ghci .hs
-
-
- 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 (link del repo)
+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 (link repo parcial)
 
 
