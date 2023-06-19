@@ -88,6 +88,8 @@ leGana pokemon1 pokemon2 = nivel pokemon2 > nivel pokemon1
 
 -- 4
 type Expedicion = [Actividad]
+
+-- Esta funcion podria ser usada para todos los reportes. 
 reportes :: (Investigador -> a) -> (Investigador -> Bool) -> Expedicion -> [Investigador] -> [a]
 reportes f condicion unaExpedicion  = map f . filter condicion . map (realizarExpedicion unaExpedicion) 
 
@@ -100,6 +102,8 @@ reporte2 unaExpedicion = map experiencia . filter tieneRangoGalaxia .  map (real
 reporte3 :: Expedicion -> [Investigador] -> [Pokemon] 
 reporte3 unaExpedicion = map compañero . filter ((>10) .nivel . compañero) .  map (realizarExpedicion unaExpedicion) 
 
+--reporte 4 (Hacer!)
+
 -- Realizar Expedicion
 realizarExpedicion :: Expedicion -> Investigador -> Investigador
 realizarExpedicion unaExpedicion unInvestigador = foldl (flip ($)) unInvestigador unaExpedicion 
@@ -109,6 +113,3 @@ tieneRangoGalaxia unInvestigador = experiencia unInvestigador > 2000
 
 esAlfa2 :: [Pokemon] -> [Pokemon]
 esAlfa2 = filter esAlfa
-
--- esAlfa :: Pokemon -> Bool
--- esAlfa unPokemon = take 4 (apodo unPokemon) == "alfa"

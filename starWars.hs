@@ -33,7 +33,7 @@ incrementarEscudos escudoNuevo unaNave = UnaNave {escudo = escudo unaNave + escu
 
 ----------------------------------------------------------
 -- Respecto a la parte de arriba (modelado de poderes), podria haber alguna forma de mejorarlo, respecto al uso de logica repetida, ya que tanto modDurabilidad como modAtaque tienen los mismos tipos, pero en realidad modifican cosas diferentes (?
--- Tambien falta realizar el superTurbo, no estoy muy seguro de como se haria este, el resto pareceria esta todo OK! 
+-- Tambien falta realizar el superTurbo, no estoy muy seguro de como se haria
 -----------------------------------------------------------
 
 -- Modelado de Naves
