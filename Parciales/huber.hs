@@ -44,15 +44,15 @@ liquidacionRemis :: Remis -> Int
 liquidacionRemis unRemis = (sum . map costo) (viajes unRemis)
 
 -- 6 a
-hacerViaje :: Viaje -> [Remis] -> Remis
-hacerViaje unViaje = agregarViaje unViaje . menosViajes .  quienesLoToman unViaje
+--hacerViaje :: Viaje -> [Remis] -> Remis
+--hacerViaje unViaje = agregarViaje unViaje . menosViajes .  quienesLoToman unViaje
 -- Faltaria la funcion recursiva, que no se muy bien como se hace
 
 quienesLoToman :: Viaje -> [Remis] -> [Remis] 
 quienesLoToman unViaje = filter (tomaViaje unViaje) 
 
-agregarViaje :: Viaje -> Remis -> Remis
-agregarViaje unViaje unRemis = UnRemis {viajes = unViaje : viajes unRemis}
+--agregarViaje :: Viaje -> Remis -> Remis
+--agregarViaje unViaje unRemis = unRemis {viajes = unViaje : viajes unRemis}
 
 
 -- menosViajes :: [Remis] -> Remis

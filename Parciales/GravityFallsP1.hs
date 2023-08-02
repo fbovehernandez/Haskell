@@ -1,4 +1,4 @@
------------------------ Samurai 2016 --------
+----------------------- Gravity Falls sin recursividad --------
 
 data Personaje = UnPersonaje {
     edad :: Int,

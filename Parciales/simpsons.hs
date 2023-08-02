@@ -23,10 +23,10 @@ irComoDirector :: Personaje -> Personaje
 irComoDirector = irAtrabajar "escuela elemental" . aumentoFelicidad (-20)
 
 aumentoFelicidad :: Int -> Personaje -> Personaje
-aumentoFelicidad n unPersonaje = UnPersonaje {felicidad =  max (felicidad unPersonaje + n) 0}
+aumentoFelicidad n unPersonaje = unPersonaje {felicidad =  max (felicidad unPersonaje + n) 0}
 
 gastarDinero :: Int -> Personaje -> Personaje
-gastarDinero cantidad unPersonaje = UnPersonaje {dinero = dinero unPersonaje + cantidad}
+gastarDinero cantidad unPersonaje = unPersonaje {dinero = dinero unPersonaje + cantidad}
 
 -- Modelado de personajes
 homero :: Personaje
@@ -48,3 +48,5 @@ serMillonario unPersonaje = dinero unPersonaje > dinero burns
 
 burns :: Personaje
 burns = UnPersonaje "Burns" 50 1000000
+
+-- Completar
