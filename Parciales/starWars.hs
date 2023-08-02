@@ -1,109 +1,126 @@
--- Parcial StarWars --- 
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Redundant bracket" #-}
+{-# HLINT ignore "Eta reduce" #-}
 
-type Accion = Nave -> Nave
-type Poder = [Accion]
-
+  -- Parcial Star Wars !!
 data Nave = UnaNave {
-    nombreDeNave :: String,
+    nombre :: String,
     durabilidad :: Int,
     escudo :: Int,
     ataque :: Int,
-    poder :: Poder
-}
+    poder :: [Poder]
+} 
 
--- Modelado de poderes
+-- funciones especiales que nos van a ayudar con el modelado de los poderes
+cambiarDurabilidad :: (Int -> Int) -> Nave -> Nave
+cambiarDurabilidad f nave = nave {durabilidad = max (f $ durabilidad nave) 0}
 
-turbo :: Accion
-turbo  = modificarAtaque 25 
+cambiarEscudo :: (Int -> Int) -> Nave -> Nave
+cambiarEscudo f nave = nave {escudo = max(f $ escudo nave) 0}
 
-modificarAtaque :: Int -> Nave -> Nave
-modificarAtaque ataqueNuevo unaNave = UnaNave {ataque = ataque unaNave + ataqueNuevo} 
+cambiarAtaque :: (Int -> Int) -> Nave -> Nave
+cambiarAtaque f nave = nave {ataque = max(f $ ataque nave) 0}
 
-reparacionDeEmergencia :: Accion 
-reparacionDeEmergencia = modificarDurablidad 50 . modificarAtaque (-30)
+cambiarPoderes :: ([Poder] -> [Poder]) -> Nave -> Nave
+cambiarPoderes f nave = nave {poder = f $ poder nave}
 
-modificarDurablidad :: Int -> Nave -> Nave 
-modificarDurablidad nuevaDurabilidad unaNave =  UnaNave {durabilidad = durabilidad unaNave + nuevaDurabilidad} 
-
--- superTurbo :: Accion
--- superTurbo = repetir 3 turbo
-
-incrementarEscudos :: Int -> Accion
-incrementarEscudos escudoNuevo unaNave = UnaNave {escudo = escudo unaNave + escudoNuevo}
-
-----------------------------------------------------------
--- Respecto a la parte de arriba (modelado de poderes), podria haber alguna forma de mejorarlo, respecto al uso de logica repetida, ya que tanto modDurabilidad como modAtaque tienen los mismos tipos, pero en realidad modifican cosas diferentes (?
--- Tambien falta realizar el superTurbo, no estoy muy seguro de como se haria
------------------------------------------------------------
-
--- Modelado de Naves
-millenniumFalcon :: Nave
-millenniumFalcon = UnaNave "Millennium Falcon" 1000 500 50 [reparacionDeEmergencia, incrementarEscudos 100]
-
-xWing :: Nave 
-xWing = UnaNave "X Wing" 300 150 100 [reparacionDeEmergencia]
+---------------------------------- RESOLUCION ----------------------------------
+type Poder = (Nave -> Nave) 
 
 tieFighter :: Nave
-tieFighter = UnaNave "TIE Fighter" 200 100 50 [turbo]
+tieFighter = UnaNave "TIE Fighter" 200 100 50 [movimientoTurbo]
 
---naveDarthVader :: Nave
---naveDarthVader = UnaNave "DarthVader" 500 300 200 [superTurbo]
+movimientoTurbo :: Poder
+movimientoTurbo = cambiarAtaque (+25)
 
--- 2
+xWing :: Nave
+xWing = UnaNave "X WING" 300 150 100 [reparacionEmergencia]
+
+reparacionEmergencia :: Poder
+reparacionEmergencia = cambiarDurabilidad (+50) . cambiarAtaque (+ (negate 30))
+
+naveDeDarthVader :: Nave
+naveDeDarthVader = UnaNave "Nave de Lord Vader" 500 300 200 [superTurbo]
+
+superTurbo :: Poder
+superTurbo = aplicarAccionANave (replicate 3 movimientoTurbo) . cambiarDurabilidad (+ (negate 45))
+
+aplicarAccionANave :: [Poder] -> Nave -> Nave
+aplicarAccionANave poderes nave = foldr ($) nave poderes 
+
+millenniumFalcon :: Nave
+millenniumFalcon = UnaNave "Millennium Falcon" 1000 500 50 [reparacionEmergencia, cambiarEscudo(+100)]
+
+-- Nave Artificial 
+naveInvisible :: Nave
+naveInvisible = UnaNave "La Nave Invisible" 0 0 20000 [debilitarDefensasTotales]
+
+debilitarDefensasTotales :: Poder
+debilitarDefensasTotales = cambiarEscudo(*0) -- La nave invisible se infiltra en la flota enemiga y les quita todo el escudo ya que es invisible, nadie la puede ver!
+
+-- Punto 2
+type Flota = [Nave]
+
 durabilidadTotal :: Flota -> Int
-durabilidadTotal = sum . map durabilidad 
+durabilidadTotal flota = sum . map durabilidad $ flota
 
--- 3
-
+-- Punto 3
 comoQueda :: Nave -> Nave -> Nave
-comoQueda naveAtacada naveAtacante = nuevasNaves (activarPoder naveAtacada) (activarPoder naveAtacante) 
+comoQueda naveAtacante naveAtacada = dañoRecibido (aplicarAccionANave (poder naveAtacante) naveAtacante) ((aplicarAccionANave (poder naveAtacada) naveAtacada))
 
-nuevasNaves :: Nave -> Nave -> Nave
-nuevasNaves naveAtacada naveAtacante 
-    | escudo naveAtacada < ataque naveAtacante = modificarNaveAtacada naveAtacada naveAtacante
+dañoRecibido :: Nave -> Nave -> Nave
+dañoRecibido naveAtacante naveAtacada 
+    | escudo naveAtacada < ataque naveAtacante = cambiarDurabilidad(+ negate(ataque naveAtacante - escudo naveAtacada)) naveAtacada
     | otherwise = naveAtacada
 
-modificarNaveAtacada :: Nave -> Nave -> Nave
-modificarNaveAtacada naveAtacada  = reducirDurabilidad naveAtacada . calcularDaño naveAtacada 
-
-reducirDurabilidad :: Nave -> Int -> Nave
-reducirDurabilidad naveAtacada daño = UnaNave {durabilidad = max (durabilidad naveAtacada - daño) 0}
-
-calcularDaño :: Nave -> Nave -> Int
-calcularDaño naveAtacada naveAtacante = ataque naveAtacante  - escudo naveAtacada
-
-activarPoder :: Nave -> Nave
-activarPoder unaNave = foldr ($) unaNave (poder unaNave)
--- 4
+-- Punto 4
 fueraDeCombate :: Nave -> Bool
-fueraDeCombate nave = durabilidad nave == 0
+fueraDeCombate  = (==0) . durabilidad
 
--- 5
-type Flota = [Nave]
+-- Punto 5
 type Estrategia = Nave -> Bool
 
--- La mision : 
-comoQuedaLaFlota :: Flota -> Nave -> Estrategia -> Flota
-comoQuedaLaFlota flota naveAtacante estrategia = map (atacarFlota estrategia naveAtacante) flota
+flota :: [Nave]
+flota = [tieFighter, xWing, naveDeDarthVader]
 
-atacarFlota :: Estrategia -> Nave -> Nave -> Nave
-atacarFlota estrategia naveAtacante naveAtacada 
-    | estrategia naveAtacada = nuevasNaves naveAtacada naveAtacante 
+-- Idea mas algoritma, pero que funciona a fin. 
+misionSorpresa :: Nave -> Estrategia -> Flota -> Flota
+misionSorpresa naveAtacante estrategia flota =  (filter(not . estrategia) flota) ++  (map (comoQueda naveAtacante) . filter estrategia) flota
+
+-- Funcion mas entedible y delegable.
+misionSorpresa2 :: Nave -> Estrategia -> Flota -> Flota
+misionSorpresa2 naveAtacante estrategia  = map(realizarAtaqueSiCumpleEstrategia naveAtacante estrategia)
+
+realizarAtaqueSiCumpleEstrategia :: Nave -> Estrategia -> Nave -> Nave
+realizarAtaqueSiCumpleEstrategia naveAtacante estrategia naveAtacada
+    | estrategia naveAtacada = comoQueda naveAtacante naveAtacada
     | otherwise = naveAtacada
 
--- 6 
+navesDebiles :: Estrategia
+navesDebiles nave = escudo nave < 200
 
-minimizaDurabilidadTotal :: Flota -> Nave -> Estrategia -> Estrategia -> Flota
-minimizaDurabilidadTotal flota naveAtacante estrategia1 estrategia2 
-    | minimizaDurabilidadE1 flota naveAtacante estrategia1 estrategia2 = comoQuedaLaFlota flota naveAtacante estrategia1
-    | otherwise = comoQuedaLaFlota flota naveAtacante estrategia2
+navePeligrosa :: Int -> Estrategia 
+navePeligrosa n = (>n) . ataque
 
-minimizaDurabilidadE1 :: Flota -> Nave -> Estrategia -> Estrategia -> Bool
-minimizaDurabilidadE1 flota nave estrategia1 estrategia2 = calcularDurabilidadTotal flota nave estrategia1  < calcularDurabilidadTotal flota nave estrategia2
+naveOutCombate :: Nave -> Estrategia 
+naveOutCombate naveAtacante = fueraDeCombate . comoQueda naveAtacante   
 
-calcularDurabilidadTotal :: Flota -> Nave -> Estrategia -> Int 
-calcularDurabilidadTotal flota nave estrategia = durabilidadTotal (comoQuedaLaFlota flota nave estrategia)
+-- Punto 6
+llevarAdelanteLaMinima :: Nave -> Estrategia -> Estrategia -> Flota -> Flota
+llevarAdelanteLaMinima naveAt e1 e2 flota = misionSorpresa2 naveAt (estrategiaMasEfectiva naveAt e1 e2 flota) flota
+
+estrategiaMasEfectiva :: Nave -> Estrategia -> Estrategia -> Flota -> Estrategia
+estrategiaMasEfectiva nave e1 e2 flota 
+    | (durabilidadTotal . misionSorpresa2 nave e1) flota < (durabilidadTotal . misionSorpresa nave e2) flota = e1
+    | otherwise = e2
 
 -- 7
--- a) No es posible, ya que para eso necesito evaluar todas las naves, y si son infinitas, esto es imposible. 
--- b) Va a quedarse mapeando todo el tiempo, ya que la mision devuelve en si una flota, que nunca termine de mapearse.  
+flotaInfinita :: Flota
+flotaInfinita = xWing : flotaInfinita  -- Lista Infinita de xWing 
+
+-- flotaInfinita = repeat xWing. -- Otra forma usando funciones generadoras de listas
+
+-------- TEORIA : 
+-- No es posible determinar la durabilidad total, ya que nunca voy a poder aplicar sum a la lista infinita. 
+-- El resultado es una lista infinita donde queda infinitamente analizando y mapeando cada una de las naves 
+-- de la flota aplicando la estrategia elegida. 
